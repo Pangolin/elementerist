@@ -75,20 +75,20 @@ function get_pinterest_description( $instance ) {
 		}
 		return $instance['pinterest_description'];
 	}
-	return get_post_meta($instance['image']['id'], 'wpcf-data-pin-description', true);
+	return get_post_meta($instance['image']['id'], 'data-pin-description', true);
 }
 
-function add_pinterest_field_attachment_details( $form_fields, $post ) {
-    $field_value = get_post_meta( $post->ID, 'wpcf-data-pin-description', true );
-    $form_fields['wpcf-data-pin-description'] = array(
-        'value' => $field_value ? $field_value : '',
-        'label' => __( 'Pinterest Description' ),
-        'helps' => __( 'This description will be added as an attribute to your image' ),
-        'input'  => 'textarea'
-    );
-    return $form_fields;
-}
-add_filter( 'attachment_fields_to_edit', 'add_pinterest_field_attachment_details', null, 2 );
+// function add_pinterest_field_attachment_details( $form_fields, $post ) {
+//     $field_value = get_post_meta( $post->ID, 'wpcf-data-pin-description', true );
+//     $form_fields['wpcf-data-pin-description'] = array(
+//         'value' => $field_value ? $field_value : '',
+//         'label' => __( 'Pinterest Description' ),
+//         'helps' => __( 'This description will be added as an attribute to your image' ),
+//         'input'  => 'textarea'
+//     );
+//     return $form_fields;
+// }
+// add_filter( 'attachment_fields_to_edit', 'add_pinterest_field_attachment_details', null, 2 );
 
 // add_action( 'elementor/widget/before_render_content', 'pinterest_render_image' );
 

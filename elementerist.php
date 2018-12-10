@@ -8,10 +8,9 @@
  * Author URI: https://www.cafevagrant.com
  */
 
-
-add_action('elementor/element/before_section_end', 'pinterest_tags', 10, 3 );
-
-function pinterest_tags( $widget, $section_id, $args ) {
+/* Adds pinterest fields to the Elementor's Image widget */
+add_action('elementor/element/before_section_end', 'add_elementor_pinterest_tags', 10, 3 );
+function add_elementor_pinterest_tags( $widget, $section_id, $args ) {
 	if( $widget->get_name() == 'image' && $section_id == 'section_image' ){
 		// we are at the end of the "section_image" area of the "image"
 		$widget->add_control(
@@ -48,12 +47,12 @@ function pinterest_tags( $widget, $section_id, $args ) {
 	}
 }
 
-add_filter( 'elementor/image_size/get_attachment_image_html', 'inject_pinterest_tags', 10, 2);
-function inject_pinterest_tags($content, $settings) {
+/* Adds the Pinterest tag in case the default WordPress editor is used */
+add_filter( 'elementor/image_size/get_attachment_image_html', 'inject_elementor_pinterest_tags', 10, 2);
+function inject_elementor_pinterest_tags($content, $settings) {
 
 	
 	$description = get_pinterest_description( $settings );
-	echo $description;
 	$content = str_replace( 
 		array( '<img ' ),
 		array( '<img ' . 'data-pin-description="' . $description . '" ' ),
@@ -63,7 +62,7 @@ function inject_pinterest_tags($content, $settings) {
 	return $content;
 }
 
-
+/* Abstracts the retrieval of the pinterest description from the tag fields */
 function get_pinterest_description( $instance ) {
 	if ( 'none' === $instance['pinterest_description_source'] ) {
 		return false;
@@ -78,91 +77,33 @@ function get_pinterest_description( $instance ) {
 	return get_post_meta($instance['image']['id'], 'data-pin-description', true);
 }
 
-// function add_pinterest_field_attachment_details( $form_fields, $post ) {
-//     $field_value = get_post_meta( $post->ID, 'wpcf-data-pin-description', true );
-//     $form_fields['wpcf-data-pin-description'] = array(
-//         'value' => $field_value ? $field_value : '',
-//         'label' => __( 'Pinterest Description' ),
-//         'helps' => __( 'This description will be added as an attribute to your image' ),
-//         'input'  => 'textarea'
-//     );
-//     return $form_fields;
-// }
-// add_filter( 'attachment_fields_to_edit', 'add_pinterest_field_attachment_details', null, 2 );
+add_filter( 'image_send_to_editor', 'add_pinterest_to_image', 10, 2 );
 
-// add_action( 'elementor/widget/before_render_content', 'pinterest_render_image' );
+function add_pinterest_to_image( $html, $attachment_id ) 
+{
+    if ($attachment_id)
+    {
+        //check if there is vimeo video id for the image
+        $data_pin_description = get_post_meta($attachment_id, 'data-pin-description', true);
 
-// function pinterest_render_image( $widget ) {
+        //if there is a vimeo id set for the image, add class and data-attr
+        if ($data_pin_description)
+        {
+            $document = new DOMDocument();
+            $document->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 
-// 	if( 'image' === $widget->get_name() ) {
+            $imgs = $document->getElementsByTagName('img');
 
-// 		$settings = $widget->get_settings();
+            foreach ($imgs as $img)
+            {
 
-// 		$pinterest_description = get_pinterest_description($settings);
+                //add the data attribute
+                $img->setAttribute('data-pin-description', $data_pin_description);
+            }
 
-// 		// Adding new Pinterest attributes
-// 		if( $pinterest_description ) {
-// 		  echo $pinterest_description;
+            $html = $document->saveHTML();
+        }
+    }
 
-// 		  $widget->add_render_attribute( 'img', [
-// 		  	'data-pin-description' => $pinterest_description,
-// 		  ], true );
-// 		}
-// 	}
-// }
-
-// function pinterest_render_image( $widget ) {
-
-// 	if( 'image' === $widget->get_name() ) {
-
-// 		$settings = $widget->get_settings();
-
-// 		$pinterest_description = get_pinterest_description($settings);
-
-// 		// Adding new Pinterest attributes
-// 		if( $pinterest_description ) {
-// 		  echo $pinterest_description;
-
-// 		  $widget->add_render_attribute( 'img', [
-// 		  	'data-pin-description' => $pinterest_description,
-// 		  ], true );
-// 		}
-// 	}
-// }
-
-
-
-
-
-
-
-// add_filter('elementor/widget/render_content', function ($content, $widget) {
-
-	
-//   if ($widget->get_name() !== 'image') {
-//     return $content;
-//   }
-//   var_dump($widget);
-//   echo $content;
-
-  // $dom = new \Zend\Dom\Query($content);
-  // $buttons = $dom->execute('.elementor-cta__button-wrapper');
-
-  // foreach ($buttons as $button) {
-  //   $buttonTag = $button->ownerDocument->saveXML($button);
-  //   $className = 'elementor-element elementor-button-' . $widget->get_settings('ntz_button_type');
-
-  //   $content = str_replace(
-  //     $buttonTag,
-  //     sprintf('<div class="elementor-widget-button %s"><div class="elementor-button">%s</div></div>', $className, $buttonTag),
-  //     $content
-  //   );
-  // }
-  
-//   return $content;
-// }, 10, 2);
-
-
-
-
-
+    return $html;
+}

@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: Elementor Pinterest Tag Addon
- * Plugin URI: https://www.cafevagrant.com
- * Description: A plugin to add pinterest tags to the Elementor image widget
+ * Plugin Name: Elementerist
+ * Plugin URI: https://pangolin.ai
+ * Description: A plugin to add pinterest tags to the Elementor image widget created by Tanner Chung
  * Version: 1.0
- * Author: Cafe Vagrant
- * Author URI: https://www.cafevagrant.com
+ * Author: Pangolin
+ * Author URI: https://pangolin.ai
  */
 
 /* Adds pinterest fields to the Elementor's Image widget */
@@ -47,18 +47,19 @@ function add_elementor_pinterest_tags( $widget, $section_id, $args ) {
 	}
 }
 
-/* Adds the Pinterest tag in case the default WordPress editor is used */
+/* Adds pinterest fields grabbed from media attachment/widget to the image render */
 add_filter( 'elementor/image_size/get_attachment_image_html', 'inject_elementor_pinterest_tags', 10, 2);
 function inject_elementor_pinterest_tags($content, $settings) {
 
 	
 	$description = get_pinterest_description( $settings );
-	$content = str_replace( 
-		array( '<img ' ),
-		array( '<img ' . 'data-pin-description="' . $description . '" ' ),
-		$content 
-	);
-
+	if ($description){
+		$content = str_replace( 
+			array( '<img ' ),
+			array( '<img ' . 'data-pin-description="' . $description . '" ' ),
+			$content 
+		);
+	}
 	return $content;
 }
 
@@ -77,16 +78,19 @@ function get_pinterest_description( $instance ) {
 	return get_post_meta($instance['image']['id'], 'data-pin-description', true);
 }
 
+
+
+/* Adds pinterest description in case user decides to use wordpress' default editor */
 add_filter( 'image_send_to_editor', 'add_pinterest_to_image', 10, 2 );
 
 function add_pinterest_to_image( $html, $attachment_id ) 
 {
     if ($attachment_id)
     {
-        //check if there is vimeo video id for the image
+        //check if there is data-pin-description
         $data_pin_description = get_post_meta($attachment_id, 'data-pin-description', true);
 
-        //if there is a vimeo id set for the image, add class and data-attr
+        //if there is a data-pin-description set for the image, add data-pin-description
         if ($data_pin_description)
         {
             $document = new DOMDocument();
@@ -106,4 +110,12 @@ function add_pinterest_to_image( $html, $attachment_id )
     }
 
     return $html;
+}
+
+
+/* Disable Pods shortcode button, storing here for the time being */
+add_action( 'admin_init', 'remove_pods_shortcode_button', 14 );
+
+function remove_pods_shortcode_button () {
+    remove_action( 'media_buttons', array( PodsInit::$admin, 'media_button' ), 12 );
 }

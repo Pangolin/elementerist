@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Elementerist
  * Plugin URI: https://pangolin.ai
- * Description: A plugin to add pinterest tags to the Elementor image widget created by Tanner Chung
+ * Description: A plugin to add pinterest tags to the Elementor image widget created by Pangolin
  * Version: 1.0
  * Author: Pangolin
  * Author URI: https://pangolin.ai
@@ -113,9 +113,9 @@ function add_pinterest_to_image( $html, $attachment_id )
 }
 
 
-/* Disable Pods shortcode button, storing here for the time being */
-add_action( 'admin_init', 'remove_pods_shortcode_button', 14 );
+// /* Disable Pods shortcode button, storing here for the time being */
+// add_action( 'admin_init', 'remove_pods_shortcode_button', 14 );
 
-function remove_pods_shortcode_button () {
-    remove_action( 'media_buttons', array( PodsInit::$admin, 'media_button' ), 12 );
-}
+// function remove_pods_shortcode_button () {
+//     remove_action( 'media_buttons', array( PodsInit::$admin, 'media_button' ), 12 );
+// }
